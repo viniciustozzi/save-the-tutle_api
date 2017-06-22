@@ -62,23 +62,23 @@ def load_data():
         x_i.append(map(map_func, array(Image.open(item_escada).getdata(), np.uint8)))
         y_i.append(escada)
 
-    for item_tabua in glob.glob("data/tauba/*.png"):
+    for item_tabua in glob.glob("data/taubua/*.png"):
         x_i.append(map(map_func, array(Image.open(item_tabua).getdata(), np.uint8)))
         y_i.append(tabua)
 
     return {x: x_i, y: y_i}
 
 
+data = load_data()
+
 with tf.Session() as sess:
     init = tf.global_variables_initializer()
+    saver = tf.train.Saver()
     sess.run(init)
 
     correct_prediction = tf.equal(tf.argmax(output, 1), y)
 
-    # Operation calculating the accuracy of our predictions
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
-    data = load_data()
 
     for i in range(10000):
         train_accuracy = sess.run(accuracy, feed_dict=data)
@@ -87,4 +87,9 @@ with tf.Session() as sess:
         writer = tf.summary.FileWriter("1")
         writer.add_graph(sess.graph)
         if train_accuracy == 1.0:
+            var = sess.run(output, feed_dict=data)
+            print var
+            print len(var)
             break
+
+    save_path = saver.save(sess, "data/model.ckpt")
