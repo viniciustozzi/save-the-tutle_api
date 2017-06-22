@@ -43,6 +43,10 @@ def map_func(x):
     return np.float32(x[0] / 255)
 
 
+def map_conv(x):
+    return np.float32(x)
+
+
 sess = tf.Session()
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
@@ -53,6 +57,13 @@ saver.restore(sess, "data/model.ckpt")
 def parse_request():
     img = Image.open(BytesIO(request.files["file"].read()))
     data = map(map_func, array(img.getdata(), np.uint8))
+    var = sess.run(tf.argmax(output, 1), {x: [data]})
+    return jsonify(var[0])
+
+
+@app.route('/json', methods=['POST'])
+def parse_json_request():
+    data = map(map_conv, request.get_json())
     var = sess.run(tf.argmax(output, 1), {x: [data]})
     return jsonify(var[0])
 
