@@ -2,6 +2,10 @@ import tensorflow as tf
 import numpy as np
 from numpy import array
 from PIL import Image
+from flask import Flask, request, jsonify
+from io import BytesIO
+
+app = Flask(__name__)
 
 n_nodes_hl1 = 50
 n_nodes_hl2 = 50
@@ -39,10 +43,18 @@ def map_func(x):
     return np.float32(x[0] / 255)
 
 
-with tf.Session() as sess:
-    init = tf.global_variables_initializer()
-    saver = tf.train.Saver()
-    saver.restore(sess, "data/model.ckpt")
-    print sess.run(tf.argmax(output, 1), {x: [map(map_func, array(Image.open("data/teste/1.png").getdata(), np.uint8))]})
-    print sess.run(tf.argmax(output, 1), {x: [map(map_func, array(Image.open("data/teste/2.png").getdata(), np.uint8))]})
-    print sess.run(tf.argmax(output, 1), {x: [map(map_func, array(Image.open("data/teste/3.png").getdata(), np.uint8))]})
+sess = tf.Session()
+init = tf.global_variables_initializer()
+saver = tf.train.Saver()
+saver.restore(sess, "data/model.ckpt")
+
+
+@app.route('/', methods=['POST'])
+def parse_request():
+    img = Image.open(BytesIO(request.files["file"].read()))
+    data = map(map_func, array(img.getdata(), np.uint8))
+    var = sess.run(tf.argmax(output, 1), {x: [data]})
+    return jsonify(var[0])
+
+
+app.run()
