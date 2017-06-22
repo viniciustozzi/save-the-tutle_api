@@ -63,7 +63,7 @@ def parse_request():
 
 @app.route('/json', methods=['POST'])
 def parse_json_request():
-    data = map(map_conv, request.get_json())
+    data = list(map(map_conv, request.get_json()))
     var = sess.run(tf.argmax(output, 1), {x: [data]})
     return jsonify(var[0])
 

@@ -26,20 +26,25 @@ output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl3, n_classes]
                 'biases': tf.Variable(tf.random_normal([n_classes])), }
 
 l1 = tf.add(tf.matmul(x, hidden_1_layer['weights']), hidden_1_layer['biases'])
-tf.summary.histogram("l1", l1)
+tf.summary.histogram("normal/l1", l1)
 l1 = tf.nn.relu(l1)
-tf.summary.histogram("act", l1)
 
 l2 = tf.add(tf.matmul(l1, hidden_2_layer['weights']), hidden_2_layer['biases'])
 l2 = tf.nn.relu(l2)
+tf.summary.histogram("normal/l2", l2)
 
 l3 = tf.add(tf.matmul(l2, hidden_3_layer['weights']), hidden_3_layer['biases'])
 l3 = tf.nn.relu(l3)
+tf.summary.histogram("normal/l3", l3)
 
 output = tf.matmul(l3, output_layer['weights']) + output_layer['biases']
 
 loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=output, labels=y))
-train_step = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
+train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(loss)
+
+tf.summary.histogram("normal/output", output)
+
+summaries = tf.summary.merge_all()
 
 
 def map_func(x):
@@ -55,15 +60,15 @@ def load_data():
     y_i = []
 
     for item_caixa in glob.glob("data/caixa/*.png"):
-        x_i.append(map(map_func, array(Image.open(item_caixa).getdata(), np.uint8)))
+        x_i.append(list(map(map_func, array(Image.open(item_caixa).getdata(), np.uint8))))
         y_i.append(caixa)
 
     for item_escada in glob.glob("data/escada/*.png"):
-        x_i.append(map(map_func, array(Image.open(item_escada).getdata(), np.uint8)))
+        x_i.append(list(map(map_func, array(Image.open(item_escada).getdata(), np.uint8))))
         y_i.append(escada)
 
     for item_tabua in glob.glob("data/taubua/*.png"):
-        x_i.append(map(map_func, array(Image.open(item_tabua).getdata(), np.uint8)))
+        x_i.append(list(map(map_func, array(Image.open(item_tabua).getdata(), np.uint8))))
         y_i.append(tabua)
 
     return {x: x_i, y: y_i}
@@ -80,16 +85,17 @@ with tf.Session() as sess:
 
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-    for i in range(10000):
+    for i in range(500):
         train_accuracy = sess.run(accuracy, feed_dict=data)
         sess.run(train_step, feed_dict=data)
         print('Step {:5d}: training accuracy {:g}'.format(i, train_accuracy))
+
         writer = tf.summary.FileWriter("1")
         writer.add_graph(sess.graph)
-        if train_accuracy == 1.0:
-            var = sess.run(output, feed_dict=data)
-            print var
-            print len(var)
-            break
+
+        summ = sess.run(summaries, feed_dict=data)
+        writer.add_summary(summ, global_step=i)
+        if train_accuracy >= 1:
+            break;
 
     save_path = saver.save(sess, "data/model.ckpt")
