@@ -12,7 +12,7 @@ n_nodes_hl2 = 50
 n_nodes_hl3 = 50
 n_nodes_hl4 = 50
 
-n_classes = 4
+n_classes = 5
 
 x = tf.placeholder('float', [None, 2840])
 y = tf.placeholder(tf.int64)
@@ -68,7 +68,7 @@ saver.restore(sess, "data/71x40/model.ckpt")
 @app.route('/', methods=['POST'])
 def parse_request():
     img = Image.open(BytesIO(request.files["file"].read()))
-    data = map(map_func, array(img.getdata(), np.uint8))
+    data = list(map(map_func, array(img.getdata(), np.uint8)))
     var = sess.run(tf.argmax(output, 1), {x: [data]})
     return jsonify(str(var[0]))
 

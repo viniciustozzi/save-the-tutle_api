@@ -9,7 +9,7 @@ n_nodes_hl2 = 50
 n_nodes_hl3 = 50
 n_nodes_hl4 = 50
 
-n_classes = 4
+n_classes = 5
 
 x = tf.placeholder('float', [None, 2840])
 y = tf.placeholder(tf.int64)
@@ -65,6 +65,7 @@ def load_data():
     caixa = np.int64(1)
     tabua = np.int64(2)
     barco = np.int64(3)
+    x_img = np.int64(4)
 
     x_i = []
     y_i = []
@@ -84,6 +85,10 @@ def load_data():
     for item_tabua in glob.glob("data/71x40/barco/*.png"):
         x_i.append(list(map(map_func, array(Image.open(item_tabua).getdata(), np.uint8))))
         y_i.append(barco)
+
+    for item_tabua in glob.glob("data/71x40/x/*.png"):
+        x_i.append(list(map(map_func, array(Image.open(item_tabua).getdata(), np.uint8))))
+        y_i.append(x_img)
 
 
     return {x: x_i, y: y_i}
