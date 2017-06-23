@@ -3,10 +3,11 @@ from PIL import Image
 from numpy import array
 import numpy as np
 import glob
+from json import load
 
 n_nodes_hl1 = 50
-n_nodes_hl2 = 50
-n_nodes_hl3 = 50
+n_nodes_hl2 = 500
+n_nodes_hl3 = 500
 n_nodes_hl4 = 50
 
 n_classes = 5
@@ -90,6 +91,26 @@ def load_data():
         x_i.append(list(map(map_func, array(Image.open(item_tabua).getdata(), np.uint8))))
         y_i.append(x_img)
 
+    for item_json_x in glob.glob("data/71x40/x/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(x_img)
+
+    for item_json_x in glob.glob("data/71x40/x/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(x_img)
+
+    for item_json_x in glob.glob("data/71x40/barco/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(barco)
+
+    for item_json_x in glob.glob("data/71x40/escada/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(escada)
+
+    for item_json_x in glob.glob("data/71x40/taubua/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(tabua)
+
 
     return {x: x_i, y: y_i}
 
@@ -106,7 +127,7 @@ with tf.Session() as sess:
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     tf.summary.histogram("normal/accuracy", accuracy)
 
-    for i in range(1000):
+    for i in range(1200):
         train_accuracy = sess.run(accuracy, feed_dict=data)
         sess.run(train_step, feed_dict=data)
         print('Step {:5d}: training accuracy {:g}'.format(i, train_accuracy))
@@ -116,7 +137,7 @@ with tf.Session() as sess:
 
         summ = sess.run(summaries, feed_dict=data)
         writer.add_summary(summ, global_step=i)
-        if train_accuracy >= 1:
+        if train_accuracy >= 0.9:
             break
 
     save_path = saver.save(sess, "data/71x40/model.ckpt")
