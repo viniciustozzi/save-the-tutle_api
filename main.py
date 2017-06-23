@@ -3,6 +3,7 @@ from PIL import Image
 from numpy import array
 import numpy as np
 import glob
+from json import load
 
 n_nodes_hl1 = 50
 n_nodes_hl2 = 50
@@ -89,6 +90,26 @@ def load_data():
     for item_tabua in glob.glob("data/71x40/x/*.png"):
         x_i.append(list(map(map_func, array(Image.open(item_tabua).getdata(), np.uint8))))
         y_i.append(x_img)
+
+    for item_json_x in glob.glob("data/71x40/x/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(x_img)
+
+    for item_json_x in glob.glob("data/71x40/x/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(x_img)
+
+    for item_json_x in glob.glob("data/71x40/barco/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(barco)
+
+    for item_json_x in glob.glob("data/71x40/escada/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(escada)
+
+    for item_json_x in glob.glob("data/71x40/taubua/*.json"):
+        x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
+        y_i.append(tabua)
 
 
     return {x: x_i, y: y_i}
