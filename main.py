@@ -6,8 +6,8 @@ import glob
 from json import load
 
 n_nodes_hl1 = 50
-n_nodes_hl2 = 500
-n_nodes_hl3 = 500
+n_nodes_hl2 = 50
+n_nodes_hl3 = 50
 n_nodes_hl4 = 50
 
 n_classes = 5
@@ -95,7 +95,7 @@ def load_data():
         x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
         y_i.append(x_img)
 
-    for item_json_x in glob.glob("data/71x40/x/*.json"):
+    for item_json_x in glob.glob("data/71x40/caixa/*.json"):
         x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
         y_i.append(x_img)
 
@@ -126,18 +126,18 @@ with tf.Session() as sess:
 
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     tf.summary.histogram("normal/accuracy", accuracy)
+    try:
+        for i in range(1500):
+            train_accuracy = sess.run(accuracy, feed_dict=data)
+            sess.run(train_step, feed_dict=data)
+            print('Step {:5d}: training accuracy {:g}'.format(i, train_accuracy))
 
-    for i in range(1200):
-        train_accuracy = sess.run(accuracy, feed_dict=data)
-        sess.run(train_step, feed_dict=data)
-        print('Step {:5d}: training accuracy {:g}'.format(i, train_accuracy))
+            writer = tf.summary.FileWriter("1")
+            writer.add_graph(sess.graph)
 
-        writer = tf.summary.FileWriter("1")
-        writer.add_graph(sess.graph)
-
-        summ = sess.run(summaries, feed_dict=data)
-        writer.add_summary(summ, global_step=i)
-        if train_accuracy >= 0.9:
-            break
-
-    save_path = saver.save(sess, "data/71x40/model.ckpt")
+            summ = sess.run(summaries, feed_dict=data)
+            writer.add_summary(summ, global_step=i)
+            if train_accuracy >= 0.9:
+                break
+    finally:
+        save_path = saver.save(sess, "data/71x40/model.ckpt")
