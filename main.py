@@ -7,13 +7,14 @@ import glob
 n_nodes_hl1 = 50
 n_nodes_hl2 = 50
 n_nodes_hl3 = 50
+n_nodes_hl4 = 50
 
 n_classes = 3
 
-x = tf.placeholder('float', [None, 375])
+x = tf.placeholder('float', [None, 2840])
 y = tf.placeholder(tf.int64)
 
-hidden_1_layer = {'weights': tf.Variable(tf.random_normal([375, n_nodes_hl1])),
+hidden_1_layer = {'weights': tf.Variable(tf.random_normal([2840, n_nodes_hl1])),
                   'biases': tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
 hidden_2_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
@@ -22,7 +23,10 @@ hidden_2_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_
 hidden_3_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
                   'biases': tf.Variable(tf.random_normal([n_nodes_hl3]))}
 
-output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
+hidden_4_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl3, n_nodes_hl4])),
+                  'biases': tf.Variable(tf.random_normal([n_nodes_hl4]))}
+
+output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl4, n_classes])),
                 'biases': tf.Variable(tf.random_normal([n_classes])), }
 
 l1 = tf.add(tf.matmul(x, hidden_1_layer['weights']), hidden_1_layer['biases'])
@@ -37,12 +41,17 @@ l3 = tf.add(tf.matmul(l2, hidden_3_layer['weights']), hidden_3_layer['biases'])
 l3 = tf.nn.relu(l3)
 tf.summary.histogram("normal/l3", l3)
 
-output = tf.matmul(l3, output_layer['weights']) + output_layer['biases']
+l4 = tf.add(tf.matmul(l3, hidden_4_layer['weights']), hidden_4_layer['biases'])
+l4 = tf.nn.relu(l4)
+tf.summary.histogram("normal/l4", l4)
+
+output = tf.matmul(l4, output_layer['weights']) + output_layer['biases']
 
 loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=output, labels=y))
 train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(loss)
 
 tf.summary.histogram("normal/output", output)
+tf.summary.histogram("normal/loss", loss)
 
 summaries = tf.summary.merge_all()
 
@@ -59,15 +68,15 @@ def load_data():
     x_i = []
     y_i = []
 
-    for item_caixa in glob.glob("data/caixa/*.png"):
+    for item_caixa in glob.glob("data/71x40/caixa/*.png"):
         x_i.append(list(map(map_func, array(Image.open(item_caixa).getdata(), np.uint8))))
         y_i.append(caixa)
 
-    for item_escada in glob.glob("data/escada/*.png"):
+    for item_escada in glob.glob("data/71x40/escada/*.png"):
         x_i.append(list(map(map_func, array(Image.open(item_escada).getdata(), np.uint8))))
         y_i.append(escada)
 
-    for item_tabua in glob.glob("data/taubua/*.png"):
+    for item_tabua in glob.glob("data/71x40/taubua/*.png"):
         x_i.append(list(map(map_func, array(Image.open(item_tabua).getdata(), np.uint8))))
         y_i.append(tabua)
 
@@ -84,8 +93,9 @@ with tf.Session() as sess:
     correct_prediction = tf.equal(tf.argmax(output, 1), y)
 
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    tf.summary.histogram("normal/accuracy", accuracy)
 
-    for i in range(500):
+    for i in range(1000):
         train_accuracy = sess.run(accuracy, feed_dict=data)
         sess.run(train_step, feed_dict=data)
         print('Step {:5d}: training accuracy {:g}'.format(i, train_accuracy))
@@ -96,6 +106,6 @@ with tf.Session() as sess:
         summ = sess.run(summaries, feed_dict=data)
         writer.add_summary(summ, global_step=i)
         if train_accuracy >= 1:
-            break;
+            break
 
-    save_path = saver.save(sess, "data/model.ckpt")
+    save_path = saver.save(sess, "data/71x40/model.ckpt")

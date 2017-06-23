@@ -13,9 +13,9 @@ n_nodes_hl3 = 50
 
 n_classes = 3
 
-x = tf.placeholder('float', [None, 375])
+x = tf.placeholder('float', [None, 2840])
 
-hidden_1_layer = {'weights': tf.Variable(tf.random_normal([375, n_nodes_hl1])),
+hidden_1_layer = {'weights': tf.Variable(tf.random_normal([2840, n_nodes_hl1])),
                   'biases': tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
 hidden_2_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
@@ -50,7 +50,7 @@ def map_conv(x):
 sess = tf.Session()
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
-saver.restore(sess, "data/model.ckpt")
+saver.restore(sess, "data/71x40/model.ckpt")
 
 
 @app.route('/', methods=['POST'])
