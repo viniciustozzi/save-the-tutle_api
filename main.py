@@ -5,10 +5,10 @@ import numpy as np
 import glob
 from json import load
 
-n_nodes_hl1 = 50
-n_nodes_hl2 = 500
-n_nodes_hl3 = 500
-n_nodes_hl4 = 50
+n_nodes_hl1 = 100
+n_nodes_hl2 = 100
+n_nodes_hl3 = 100
+n_nodes_hl4 = 100
 
 n_classes = 5
 
@@ -127,7 +127,7 @@ with tf.Session() as sess:
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     tf.summary.histogram("normal/accuracy", accuracy)
 
-    for i in range(1200):
+    for i in range(1000):
         train_accuracy = sess.run(accuracy, feed_dict=data)
         sess.run(train_step, feed_dict=data)
         print('Step {:5d}: training accuracy {:g}'.format(i, train_accuracy))
