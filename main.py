@@ -5,17 +5,11 @@ import numpy as np
 import glob
 from json import load
 
-<<<<<<< HEAD
 n_nodes_hl1 = 500
 n_nodes_hl2 = 500
 n_nodes_hl3 = 500
 n_nodes_hl4 = 500
-=======
-n_nodes_hl1 = 50
-n_nodes_hl2 = 50
-n_nodes_hl3 = 50
-n_nodes_hl4 = 50
->>>>>>> 1bc1b33249ebc5b546c8b22c30e99bf9927c5ae8
+
 
 n_classes = 5
 
@@ -134,11 +128,7 @@ with tf.Session() as sess:
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     tf.summary.histogram("normal/accuracy", accuracy)
     try:
-<<<<<<< HEAD
-        for i in range(100):
-=======
-        for i in range(1500):
->>>>>>> 1bc1b33249ebc5b546c8b22c30e99bf9927c5ae8
+        for i in range(140):
             train_accuracy = sess.run(accuracy, feed_dict=data)
             sess.run(train_step, feed_dict=data)
             print('Step {:5d}: training accuracy {:g}'.format(i, train_accuracy))
@@ -148,14 +138,8 @@ with tf.Session() as sess:
 
             summ = sess.run(summaries, feed_dict=data)
             writer.add_summary(summ, global_step=i)
-<<<<<<< HEAD
             #if train_accuracy >= 0.9:
             #    break
     finally:
         save_path = saver.save(sess, "data/71x40/model.ckpt")
-=======
-            if train_accuracy >= 0.9:
-                break
-    finally:
-        save_path = saver.save(sess, "data/71x40/model.ckpt")
->>>>>>> 1bc1b33249ebc5b546c8b22c30e99bf9927c5ae8
+
