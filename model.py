@@ -10,7 +10,11 @@ def map_func(x):
     return np.float32(x[0] / 255)
 
 
-def load_feed(x, y, keep_prob, dropout):
+def map_conv(x):
+    return np.float32(x)
+
+
+def load_data(x, y):
     escada = np.int64(0)
     caixa = np.int64(1)
     tabua = np.int64(2)
@@ -44,7 +48,7 @@ def load_feed(x, y, keep_prob, dropout):
         x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
         y_i.append(x_img)
 
-    for item_json_x in glob.glob("data/71x40/x/*.json"):
+    for item_json_x in glob.glob("data/71x40/caixa/*.json"):
         x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
         y_i.append(x_img)
 
@@ -60,45 +64,47 @@ def load_feed(x, y, keep_prob, dropout):
         x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
         y_i.append(tabua)
 
-    return {x: x_i, y: y_i, keep_prob: dropout}
+    return {x: x_i, y: y_i}
 
 
-def conv2d(x, W, b, strides=1):
-    # Conv2D wrapper, with bias and relu activation
-    x = tf.nn.conv2d(x, W, strides=[1, strides, strides, 1], padding='SAME')
-    x = tf.nn.bias_add(x, b)
-    return tf.nn.relu(x)
+def load_model():
+    n_nodes_hl1 = 500
+    n_nodes_hl2 = 500
+    n_nodes_hl3 = 500
+    n_nodes_hl4 = 500
 
+    n_classes = 5
 
-def maxpool2d(x, k=2):
-    # MaxPool2D wrapper
-    return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1],
-                          padding='SAME')
+    x = tf.placeholder('float', [None, 2840])
+    y = tf.placeholder(tf.int64)
 
+    hidden_1_layer = {'weights': tf.Variable(tf.random_normal([2840, n_nodes_hl1])),
+                      'biases': tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
-# Create model
-def conv_net(x, weights, biases, dropout):
-    # Reshape input picture
-    x = tf.reshape(x, shape=[-1, 71, 40, 1])
+    hidden_2_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
+                      'biases': tf.Variable(tf.random_normal([n_nodes_hl2]))}
 
-    # Convolution Layer
-    conv1 = conv2d(x, weights['wc1'], biases['bc1'])
-    # Max Pooling (down-sampling)
-    conv1 = maxpool2d(conv1, k=2)
+    hidden_3_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
+                      'biases': tf.Variable(tf.random_normal([n_nodes_hl3]))}
 
-    # Convolution Layer
-    conv2 = conv2d(conv1, weights['wc2'], biases['bc2'])
-    # Max Pooling (down-sampling)
-    conv2 = maxpool2d(conv2, k=2)
+    hidden_4_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl3, n_nodes_hl4])),
+                      'biases': tf.Variable(tf.random_normal([n_nodes_hl4]))}
 
-    # Fully connected layer
-    # Reshape conv2 output to fit fully connected layer input
-    fc1 = tf.reshape(conv2, [-1, weights['wd1'].get_shape().as_list()[0]])
-    fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
-    fc1 = tf.nn.relu(fc1)
-    # Apply Dropout
-    fc1 = tf.nn.dropout(fc1, dropout)
+    output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl4, n_classes])),
+                    'biases': tf.Variable(tf.random_normal([n_classes])), }
 
-    # Output, class prediction
-    out = tf.add(tf.matmul(fc1, weights['out']), biases['out'])
-    return out
+    l1 = tf.add(tf.matmul(x, hidden_1_layer['weights']), hidden_1_layer['biases'])
+    l1 = tf.nn.relu(l1)
+
+    l2 = tf.add(tf.matmul(l1, hidden_2_layer['weights']), hidden_2_layer['biases'])
+    l2 = tf.nn.relu(l2)
+
+    l3 = tf.add(tf.matmul(l2, hidden_3_layer['weights']), hidden_3_layer['biases'])
+    l3 = tf.nn.relu(l3)
+
+    l4 = tf.add(tf.matmul(l3, hidden_4_layer['weights']), hidden_4_layer['biases'])
+    l4 = tf.nn.relu(l4)
+
+    output = tf.matmul(l4, output_layer['weights']) + output_layer['biases']
+
+    return x, y, output
