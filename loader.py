@@ -7,10 +7,10 @@ from io import BytesIO
 
 app = Flask(__name__)
 
-n_nodes_hl1 = 50
-n_nodes_hl2 = 50
-n_nodes_hl3 = 50
-n_nodes_hl4 = 50
+n_nodes_hl1 = 75
+n_nodes_hl2 = 75
+n_nodes_hl3 = 75
+n_nodes_hl4 = 75
 
 n_classes = 5
 

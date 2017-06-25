@@ -5,10 +5,10 @@ import numpy as np
 import glob
 from json import load
 
-n_nodes_hl1 = 100
-n_nodes_hl2 = 100
-n_nodes_hl3 = 100
-n_nodes_hl4 = 100
+n_nodes_hl1 = 75
+n_nodes_hl2 = 75
+n_nodes_hl3 = 75
+n_nodes_hl4 = 75
 
 n_classes = 5
 
