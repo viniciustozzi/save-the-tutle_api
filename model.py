@@ -68,10 +68,10 @@ def load_data(x, y):
 
 
 def load_model():
-    n_nodes_hl1 = 500
-    n_nodes_hl2 = 500
-    n_nodes_hl3 = 500
-    n_nodes_hl4 = 500
+    n_nodes_hl1 = 1024
+    n_nodes_hl2 = 1024
+    n_nodes_hl3 = 1024
+    n_nodes_hl4 = 1024
 
     n_classes = 5
     dropout = 0.75
