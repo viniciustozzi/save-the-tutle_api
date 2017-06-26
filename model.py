@@ -50,7 +50,7 @@ def load_data(x, y):
 
     for item_json_x in glob.glob("data/71x40/caixa/*.json"):
         x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
-        y_i.append(x_img)
+        y_i.append(caixa)
 
     for item_json_x in glob.glob("data/71x40/barco/*.json"):
         x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
@@ -64,7 +64,7 @@ def load_data(x, y):
         x_i.append(np.asarray(load(open(item_json_x, 'r')), np.float32))
         y_i.append(tabua)
 
-    return {x: x_i, y: y_i}
+    return x_i, y_i
 
 
 def load_model():
@@ -74,9 +74,11 @@ def load_model():
     n_nodes_hl4 = 500
 
     n_classes = 5
+    dropout = 0.75
 
     x = tf.placeholder('float', [None, 2840])
     y = tf.placeholder(tf.int64)
+    keep_prob = tf.placeholder(tf.float32)
 
     hidden_1_layer = {'weights': tf.Variable(tf.random_normal([2840, n_nodes_hl1])),
                       'biases': tf.Variable(tf.random_normal([n_nodes_hl1]))}
@@ -107,4 +109,4 @@ def load_model():
 
     output = tf.matmul(l4, output_layer['weights']) + output_layer['biases']
 
-    return x, y, output
+    return x, y, output, keep_prob

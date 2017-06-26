@@ -8,7 +8,7 @@ from model import load_model, map_conv, map_func
 
 app = Flask(__name__)
 
-x, y, output = load_model()
+x, y, output, keep_prob = load_model()
 
 sess = tf.Session()
 init = tf.global_variables_initializer()
