@@ -67,46 +67,28 @@ def load_data(x, y):
     return x_i, y_i
 
 
-def load_model():
-    n_nodes_hl1 = 1024
-    n_nodes_hl2 = 1024
-    n_nodes_hl3 = 1024
-    n_nodes_hl4 = 1024
-
+def load_loopable_model():
+    n_nodes_hl = 1024
+    loops = 5
     n_classes = 5
-    dropout = 0.75
-
+    keep_prob = tf.placeholder(tf.float32)
     x = tf.placeholder('float', [None, 2840])
     y = tf.placeholder(tf.int64)
-    keep_prob = tf.placeholder(tf.float32)
 
-    hidden_1_layer = {'weights': tf.Variable(tf.random_normal([2840, n_nodes_hl1])),
-                      'biases': tf.Variable(tf.random_normal([n_nodes_hl1]))}
+    hidden_layer = {'weights': tf.Variable(tf.random_normal([2840, n_nodes_hl])),
+                    'biases': tf.Variable(tf.random_normal([n_nodes_hl]))}
 
-    hidden_2_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
-                      'biases': tf.Variable(tf.random_normal([n_nodes_hl2]))}
+    l = tf.add(tf.matmul(x, hidden_layer['weights']), hidden_layer['biases'])
+    l = tf.nn.relu(l)
 
-    hidden_3_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
-                      'biases': tf.Variable(tf.random_normal([n_nodes_hl3]))}
+    for i in range(1, loops):
+        hidden_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl, n_nodes_hl])),
+                        'biases': tf.Variable(tf.random_normal([n_nodes_hl]))}
+        l = tf.add(tf.matmul(l, hidden_layer['weights']), hidden_layer['biases'])
+        l = tf.nn.relu(l)
 
-    hidden_4_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl3, n_nodes_hl4])),
-                      'biases': tf.Variable(tf.random_normal([n_nodes_hl4]))}
-
-    output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl4, n_classes])),
+    output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl, n_classes])),
                     'biases': tf.Variable(tf.random_normal([n_classes])), }
 
-    l1 = tf.add(tf.matmul(x, hidden_1_layer['weights']), hidden_1_layer['biases'])
-    l1 = tf.nn.relu(l1)
-
-    l2 = tf.add(tf.matmul(l1, hidden_2_layer['weights']), hidden_2_layer['biases'])
-    l2 = tf.nn.relu(l2)
-
-    l3 = tf.add(tf.matmul(l2, hidden_3_layer['weights']), hidden_3_layer['biases'])
-    l3 = tf.nn.relu(l3)
-
-    l4 = tf.add(tf.matmul(l3, hidden_4_layer['weights']), hidden_4_layer['biases'])
-    l4 = tf.nn.relu(l4)
-
-    output = tf.matmul(l4, output_layer['weights']) + output_layer['biases']
-
+    output = tf.matmul(l, output_layer['weights']) + output_layer['biases']
     return x, y, output, keep_prob

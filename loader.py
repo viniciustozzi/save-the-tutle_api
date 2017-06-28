@@ -4,11 +4,11 @@ from numpy import array
 from PIL import Image
 from flask import Flask, request, jsonify
 from io import BytesIO
-from model import load_model, map_conv, map_func
+from model import load_loopable_model, map_conv, map_func
 
 app = Flask(__name__)
 
-x, y, output, keep_prob = load_model()
+x, y, output, keep_prob = load_loopable_model()
 
 sess = tf.Session()
 init = tf.global_variables_initializer()
